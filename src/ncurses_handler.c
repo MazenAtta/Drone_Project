@@ -11,23 +11,23 @@ void init_ncurses() {
     refresh();
 }
 
-void draw_drone(int x, int y, char *status) {
+void draw_drone(Drone *drone, char *status) {
     clear();             // Clear the screen
-    mvaddch(y, x, DRONE_SYMBOL);  // Place drone at (x, y)
-    display_status(x, y, status);
+    mvaddch((int)drone->y, (int)drone->x, DRONE_SYMBOL);
+    display_status((int)drone->x,(int)drone->y, status);
     display_legend();
     refresh();           // Refresh the screen
 }
 
-int handle_input(int *x, int *y, char *status) {
+int handle_input(float *force_x, float *force_y, char *status) {
     int ch = getch();
     switch (ch) {
-        case KEY_UP:     (*y)--; strcpy(status, "Moving"); break;
-        case KEY_DOWN:   (*y)++; strcpy(status, "Moving"); break;
-        case KEY_LEFT:   (*x)--; strcpy(status, "Moving"); break;
-        case KEY_RIGHT:  (*x)++; strcpy(status, "Moving"); break;
-        case 'q':        return 1;  // Quit
-        case 'r':        *x = 10; *y = 10; strcpy(status, "Resetting"); break;
+        case KEY_UP:     *force_y = -1.0; strcpy(status, "Moving Up"); break;
+        case KEY_DOWN:   *force_y = 1.0; strcpy(status, "Moving Down"); break;
+        case KEY_LEFT:   *force_x = -1.0; strcpy(status, "Moving Left"); break;
+        case KEY_RIGHT:  *force_x = 1.0; strcpy(status, "Moving Right"); break;
+        case 'q':        return 1; // Quit
+        case 'r':        strcpy(status, "Resetting"); return 2; // Reset
         default:         strcpy(status, "Stopped"); break;
     }
     return 0;

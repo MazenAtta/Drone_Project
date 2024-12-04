@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -lncurses
 SRCDIR = src
 INCDIR = include
-OBJ = $(SRCDIR)/main.o $(SRCDIR)/ncurses_handler.o $(SRCDIR)/ui_handler.o
+OBJ = $(SRCDIR)/main.o $(SRCDIR)/ncurses_handler.o $(SRCDIR)/ui_handler.o $(SRCDIR)/physics_handler.o
 
 all: drone_simulator
 
