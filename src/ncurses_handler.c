@@ -26,11 +26,11 @@ int handle_input(float *force_x, float *force_y, char *status) {
         case KEY_DOWN:   *force_y = FORCE_DOWN; strcpy(status, "Moving Down"); break;
         case KEY_LEFT:   *force_x = FORCE_LEFT; strcpy(status, "Moving Left"); break;
         case KEY_RIGHT:  *force_x = FORCE_RIGHT; strcpy(status, "Moving Right"); break;
-        case 'q':        return 1; // Quit
-        case 'r':        strcpy(status, "Resetting"); return 2; // Reset
+        case 'q':        return QUIT; // Quit
+        case 'r':        strcpy(status, "Resetting"); return RESET; // Reset
         default:         strcpy(status, "Stopped"); break;
     }
-    return 0;
+    return APPLY_MOVEMENT;
 }
 
 void close_ncurses() {
