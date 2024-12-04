@@ -22,10 +22,10 @@ void draw_drone(Drone *drone, char *status) {
 int handle_input(float *force_x, float *force_y, char *status) {
     int ch = getch();
     switch (ch) {
-        case KEY_UP:     *force_y = -1.0; strcpy(status, "Moving Up"); break;
-        case KEY_DOWN:   *force_y = 1.0; strcpy(status, "Moving Down"); break;
-        case KEY_LEFT:   *force_x = -1.0; strcpy(status, "Moving Left"); break;
-        case KEY_RIGHT:  *force_x = 1.0; strcpy(status, "Moving Right"); break;
+        case KEY_UP:     *force_y = FORCE_UP; strcpy(status, "Moving Up"); break;
+        case KEY_DOWN:   *force_y = FORCE_DOWN; strcpy(status, "Moving Down"); break;
+        case KEY_LEFT:   *force_x = FORCE_LEFT; strcpy(status, "Moving Left"); break;
+        case KEY_RIGHT:  *force_x = FORCE_RIGHT; strcpy(status, "Moving Right"); break;
         case 'q':        return 1; // Quit
         case 'r':        strcpy(status, "Resetting"); return 2; // Reset
         default:         strcpy(status, "Stopped"); break;

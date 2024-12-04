@@ -6,6 +6,13 @@
 #include <physics_handler.h>
 
 #define DRONE_SYMBOL '+'
+#define APPLY_MOVEMENT 0
+#define RESET 1
+#define QUIT 2
+#define FORCE_RIGHT 1
+#define FORCE_UP -1.0
+#define FORCE_DOWN 1.0
+#define FORCE_LEFT -1.0
 
 // Initialize ncurses
 void init_ncurses();
