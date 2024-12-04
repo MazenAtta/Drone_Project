@@ -3,12 +3,14 @@
 
 int main() {
     int x = 10, y = 10;  // Initial drone position
-    init_ncurses();      // Initialize ncurses
+    char status[20] = "Stopped";
 
-    draw_drone(x, y);
+    init_ncurses();      // Initialize ncurses
+    draw_drone(x, y, status);
+
     while (1) {
-        if (handle_input(&x, &y)) break;
-        draw_drone(x, y);
+        if (handle_input(&x, &y, status)) break;
+        draw_drone(x, y, status);
     }
 
     close_ncurses();     // Cleanup ncurses
