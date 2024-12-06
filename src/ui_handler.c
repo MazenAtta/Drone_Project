@@ -1,7 +1,7 @@
 #include "ui_handler.h"
 
-void display_status(int x, int y, const char *status) {
-    mvprintw(0, 0, "Drone Position: X=%d, Y=%d | Status: %s", x, y, status);
+void display_status(float x, float y, const char *status) {
+    mvprintw(0, 0, "Drone Position: X=%f.4, Y=%f.4 | Status: %s", x, y, status);
 }
 
 void display_legend() {

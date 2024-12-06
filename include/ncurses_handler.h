@@ -14,6 +14,7 @@
 #define FORCE_DOWN 1.0
 #define FORCE_LEFT -1.0
 
+
 // Initialize ncurses
 void init_ncurses();
 
@@ -21,7 +22,7 @@ void init_ncurses();
 void draw_drone(Drone *drone, char *status);
 
 // Handle key input and update drone position
-int handle_input(float *force_x, float *force_y, char *status);
+int handle_input(Drone *drone, char *status);
 
 // Close ncurses properly
 void close_ncurses();

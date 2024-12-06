@@ -1,34 +1,44 @@
 #include "ncurses_handler.h"
 #include "ui_handler.h"
+#include "obstacle_target_handler.h"
+
+
+
 
 void init_ncurses() {
-    initscr();           // Initialize ncurses
-    cbreak();            // Disable line buffering
-    noecho();            // Disable character echo
-    keypad(stdscr, TRUE);// Enable special keys (arrows)
-    curs_set(0);         // Hide the cursor
-    clear();             // Clear the screen
+    initscr();
+    start_color();
+    init_pair(1, COLOR_BLUE, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);  // Obstacles
+    init_pair(3, COLOR_GREEN, COLOR_BLACK); // Targets
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0);
+    clear();
     refresh();
 }
 
+
 void draw_drone(Drone *drone, char *status) {
     clear();             // Clear the screen
-    mvaddch((int)drone->y, (int)drone->x, DRONE_SYMBOL);
-    display_status((int)drone->x,(int)drone->y, status);
+    mvaddch((float)drone->y, (float)drone->x, DRONE_SYMBOL);
+    display_status((float)drone->x,(float)drone->y, status);
     display_legend();
     refresh();           // Refresh the screen
 }
 
-int handle_input(float *force_x, float *force_y, char *status) {
+int handle_input(Drone *drone, char *status) {
     int ch = getch();
     switch (ch) {
-        case KEY_UP:     *force_y = FORCE_UP; strcpy(status, "Moving Up"); break;
-        case KEY_DOWN:   *force_y = FORCE_DOWN; strcpy(status, "Moving Down"); break;
-        case KEY_LEFT:   *force_x = FORCE_LEFT; strcpy(status, "Moving Left"); break;
-        case KEY_RIGHT:  *force_x = FORCE_RIGHT; strcpy(status, "Moving Right"); break;
+        case KEY_UP:    drone->command_force_y = -COMMAND_FORCE_STEP; strcpy(status, "Moving Up"); break;
+        case KEY_DOWN:  drone->command_force_y = COMMAND_FORCE_STEP; strcpy(status, "Moving Down"); break;
+        case KEY_LEFT:  drone->command_force_x = -COMMAND_FORCE_STEP; strcpy(status, "Moving Left"); break;
+        case KEY_RIGHT: drone->command_force_x = COMMAND_FORCE_STEP; strcpy(status, "Moving Right"); break;
+        case 's':       drone->prev_total_force_x = 0; drone->prev_total_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Stopped"); break;        
         case 'q':        return QUIT; // Quit
         case 'r':        strcpy(status, "Resetting"); return RESET; // Reset
-        default:         strcpy(status, "Stopped"); break;
+        default:         drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Moving"); break;
     }
     return APPLY_MOVEMENT;
 }
