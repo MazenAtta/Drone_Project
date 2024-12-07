@@ -18,7 +18,7 @@ void init_targets(Target targets[]) {
 
 void generate_obstacles(Obstacle obstacles[]) {
     for (int i = 0; i < MAX_OBSTACLES; i++) {
-        if (rand() % 10 < 2) { // 20% chance of generating
+        if (rand() % 10 < 7) { // 70% chance of generating
             obstacles[i].x = rand() % COLS;
             obstacles[i].y = rand() % LINES;
         }
@@ -27,7 +27,7 @@ void generate_obstacles(Obstacle obstacles[]) {
 
 void generate_targets(Target targets[]) {
     for (int i = 0; i < MAX_TARGETS; i++) {
-        if (targets[i].x == -1 && rand() % 10 < 1) { // 10% chance
+        if (rand() % 10 < 5) { // 50% chance
             targets[i].x = rand() % COLS;
             targets[i].y = rand() % LINES;
         }

@@ -9,6 +9,8 @@
 #define APPLY_MOVEMENT 0
 #define QUIT 1
 #define RESET 2
+#define STOP 3
+#define RESET_GAME 4
 #define FORCE_RIGHT 1
 #define FORCE_UP -1.0
 #define FORCE_DOWN 1.0

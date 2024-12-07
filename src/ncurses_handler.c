@@ -35,10 +35,11 @@ int handle_input(Drone *drone, char *status) {
         case KEY_DOWN:  drone->command_force_y = COMMAND_FORCE_STEP; strcpy(status, "Moving Down"); break;
         case KEY_LEFT:  drone->command_force_x = -COMMAND_FORCE_STEP; strcpy(status, "Moving Left"); break;
         case KEY_RIGHT: drone->command_force_x = COMMAND_FORCE_STEP; strcpy(status, "Moving Right"); break;
-        case 's':       drone->prev_total_force_x = 0; drone->prev_total_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Stopped"); break;        
-        case 'q':        return QUIT; // Quit
-        case 'r':        strcpy(status, "Resetting"); return RESET; // Reset
-        default:         drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Moving"); break;
+        case 's':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Stopped"); break; return STOP;        
+        case 'a':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET_GAME; // Reset
+        case 'q':       return QUIT; // Quit
+        case 'r':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET; // Reset
+        default:        drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Moving"); break;
     }
     return APPLY_MOVEMENT;
 }

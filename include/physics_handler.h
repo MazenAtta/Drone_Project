@@ -19,10 +19,8 @@ typedef struct {
     float ax, ay;         // Acceleration
     float prev_x, prev_y;  // For Euler’s method
     float command_force_x, command_force_y;  // Command force components
-    float force_x;
-    float force_y;
-    float prev_total_force_x;  // For Euler’s method
-    float prev_total_force_y;  // For Euler’s method
+    float prev_total_command_force_x, prev_total_command_force_y;
+    float force_x,force_y;
 } Drone;
 
 // Initialize the drone's physics
