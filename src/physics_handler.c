@@ -45,8 +45,8 @@ void calculate_total_forces(Drone *drone, Obstacle obstacles[], Target targets[]
         }
     }
 
-    /* (Optional) Still under construction
-    // Add attractive forces
+    // (Optional) Still under construction
+    /*// Add attractive forces
     for (int i = 0; i < MAX_TARGETS; i++) {
         if (targets[i].x != -1) {
             float dx = targets[i].x - drone->x;
@@ -54,12 +54,12 @@ void calculate_total_forces(Drone *drone, Obstacle obstacles[], Target targets[]
             float distance = sqrt(dx * dx + dy * dy);
             if (distance < PERCEPTION_RADIUS && distance > 0) {  // Avoid zero division
                 float attraction_factor = ATTRACTIVE_CONSTANT * (1.0 / distance - 1.0 / PERCEPTION_RADIUS) / (distance * distance);
-                total_force_x -= attraction_factor * dx / distance;
-                total_force_y -= attraction_factor * dy / distance;
+                total_force_x += attraction_factor * dx / distance;
+                total_force_y += attraction_factor * dy / distance;
             }
         }
-    }
-    */
+    }*/
+    
     /*if (total_force_x < 1) {
         total_force_x = 0;
     } else if (total_force_y < 1) {
