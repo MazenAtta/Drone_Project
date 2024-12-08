@@ -21,11 +21,9 @@ void init_ncurses() {
 
 
 void draw_drone(Drone *drone, char *status) {
-    clear();             // Clear the screen
-    mvaddch((float)drone->y, (float)drone->x, DRONE_SYMBOL);
+    mvaddch((float)drone->y, (float)drone->x, DRONE_SYMBOL| COLOR_PAIR(1));
     display_status((float)drone->x,(float)drone->y, status);
     display_legend();
-    refresh();           // Refresh the screen
 }
 
 int handle_input(Drone *drone, char *status) {
@@ -39,7 +37,7 @@ int handle_input(Drone *drone, char *status) {
         case 'a':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET_GAME; // Reset
         case 'q':       return QUIT; // Quit
         case 'r':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET; // Reset
-        default:        drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Moving"); break;
+        default:        drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Idle"); break;
     }
     return APPLY_MOVEMENT;
 }

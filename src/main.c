@@ -1,60 +1,82 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/select.h>
+#include <string.h>
 #include "ncurses_handler.h"
-#include "physics_handler.h"
-#include "obstacle_target_handler.h"
+#include "blackboard.h"
 
 int main() {
-    Drone drone;
-    char status[20] = "Stopped";
+    BlackboardPipes pipes;
 
-    Obstacle obstacles[MAX_OBSTACLES];
-    Target targets[MAX_TARGETS];
-
-    srand(time(NULL));  // Seed for random number generation
-
-    // Initialize ncurses and entities
-    init_ncurses();
-    init_drone(&drone);
-    init_obstacles(obstacles);
-    init_targets(targets);
-
-    generate_obstacles(obstacles);
-    generate_targets(targets);
-    // Initial draw of drone, obstacles, and targets
-    update_drone(&drone);
-    draw_drone(&drone, status);
-    draw_obstacles(obstacles);
-    draw_targets(targets);
-
-    while (1) 
-    {
-        int action = handle_input(&drone, status);  // Handle user input
-        
-        if (action == 1) break;  // Quit program
-        if (action == 2 || action == 3) init_drone(&drone);  // Reset drone to initial state
-        
-        // Change obstacle and target positions if action == 3
-        if (action == 4) {
-            generate_obstacles(obstacles);
-            generate_targets(targets);
-        }
-
-        // Update drone physics and redraw
-        calculate_total_forces(&drone, obstacles, targets);
-        update_drone(&drone);
-        draw_drone(&drone, status);
-
-        // Always draw obstacles and targets (their positions persist unless updated)
-        draw_obstacles(obstacles);
-        draw_targets(targets);
-
-        // Delay for smooth updates (uncomment if needed)
-        // usleep(50000);  // 50ms delay
+    // Create pipes for communication
+    if (pipe(pipes.drone_pipe) == -1 ||
+        pipe(pipes.obstacle_pipe) == -1 ||
+        pipe(pipes.target_pipe) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
     }
 
-    close_ncurses();  // Cleanup ncurses
+    // Fork drone process
+    if (fork() == 0) {
+        close(pipes.drone_pipe[0]);
+        dup2(pipes.drone_pipe[1], STDOUT_FILENO);
+        execl("./drone_process", "drone_process", NULL);
+        perror("execl");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork obstacle process
+    if (fork() == 0) {
+        close(pipes.obstacle_pipe[0]);
+        dup2(pipes.obstacle_pipe[1], STDOUT_FILENO);
+        execl("./obstacle_process", "obstacle_process", NULL);
+        perror("execl");
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork target process
+    if (fork() == 0) {
+        close(pipes.target_pipe[0]);
+        dup2(pipes.target_pipe[1], STDOUT_FILENO);
+        execl("./target_process", "target_process", NULL);
+        perror("execl");
+        exit(EXIT_FAILURE);
+    }
+
+    // Close write ends in the parent process
+    close(pipes.drone_pipe[1]);
+    close(pipes.obstacle_pipe[1]);
+    close(pipes.target_pipe[1]);
+
+    fd_set read_fds;
+    char buffer[256];
+
+    while (1) {
+        FD_ZERO(&read_fds);
+        FD_SET(pipes.drone_pipe[0], &read_fds);
+        FD_SET(pipes.obstacle_pipe[0], &read_fds);
+        FD_SET(pipes.target_pipe[0], &read_fds);
+
+        int max_fd = pipes.target_pipe[0] + 1;
+
+        if (select(max_fd, &read_fds, NULL, NULL, NULL) > 0) {
+            if (FD_ISSET(pipes.drone_pipe[0], &read_fds)) {
+                read(pipes.drone_pipe[0], buffer, sizeof(buffer));
+                printf("Drone Update: %s\n", buffer);
+            }
+
+            if (FD_ISSET(pipes.obstacle_pipe[0], &read_fds)) {
+                read(pipes.obstacle_pipe[0], buffer, sizeof(buffer));
+                printf("Obstacle Update: %s\n", buffer);
+            }
+
+            if (FD_ISSET(pipes.target_pipe[0], &read_fds)) {
+                read(pipes.target_pipe[0], buffer, sizeof(buffer));
+                printf("Target Update: %s\n", buffer);
+            }
+        }
+    }
+
     return 0;
 }
-
