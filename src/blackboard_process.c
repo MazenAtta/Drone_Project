@@ -1,63 +1,84 @@
-#include <blackboard_handler.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <string.h>
+#include <fcntl.h>
+
+void error_exit(const char *msg) {
+    perror(msg);
+    exit(EXIT_FAILURE);
+}
+
+void create_named_pipe(const char *path) {
+    if (mkfifo(path, 0666) == -1) {
+        perror("mkfifo");
+    }
+}
 
 int main() {
-    if (pipe(keyboard_pipe) == -1 || pipe(input_process_pipe) == -1 || pipe(output_process_pipe) == -1) {
-        error_exit("Pipe creation failed");
+    // Define paths for named pipes
+
+    const char *input_ask = "/tmp/input_ask";
+    const char *input_receive = "/tmp/input_receive";
+    const char *output_ask = "/tmp/output_ask";
+    const char *output_receive = "/tmp/output_receive";
+
+    // Create named pipes
+
+    create_named_pipe(input_ask);
+    create_named_pipe(input_receive);
+    create_named_pipe(output_ask);
+    create_named_pipe(output_receive);
+
+    // Open named pipes in the blackboard process
+
+    int fd_input_ask = open(input_ask, O_RDWR);
+    int fd_input_receive = open(input_receive, O_RDWR);
+    int fd_output_ask = open(output_ask, O_RDWR);
+    int fd_output_receive = open(output_receive, O_RDWR);
+
+    // Spawn the server process
+    char *server_process_arg_list[] = {"konsole", "-e","./server_process", NULL};
+    if (fork() == 0) {
+        execvp(server_process_arg_list[0], server_process_arg_list);
+        error_exit("Failed to spawn server process");
     }
 
-    // Argument lists for processes
-    char *keyboard_args[] = {"./keyboard_process", NULL};
-    char *input_window_args[] = {"./input_window_process", NULL};
-    char *output_window_args[] = {"./output_window_process", NULL};
 
-    // Spawn the processes
-    if (spawn(keyboard_args[0], keyboard_args) == -1) error_exit("Failed to spawn keyboard process");
-    if (spawn(input_window_args[0], input_window_args) == -1) error_exit("Failed to spawn input window process");
-    if (spawn(output_window_args[0], output_window_args) == -1) error_exit("Failed to spawn output window process");
-
-    DroneState drone = {10.0, 10.0, 0.0, 0.0, 0.0, 0.0};
-    char buffer[BUFFER_SIZE];
-
-    printf("Blackboard Server started...\n");
-
-    fd_set read_fds;
-    while (1) {
-        FD_ZERO(&read_fds);
-        FD_SET(keyboard_pipe[0], &read_fds);
-
-        int max_fd = keyboard_pipe[0];
-        if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) > 0) {
-            if (FD_ISSET(keyboard_pipe[0], &read_fds)) {
-                if (read(keyboard_pipe[0], buffer, sizeof(buffer)) > 0) {
-                    printf("Received command: %s\n", buffer);
-
-                    // Update drone state based on command
-                    if (strcmp(buffer, "UP") == 0) {
-                        drone.y -= 1.0;
-                    } else if (strcmp(buffer, "DOWN") == 0) {
-                        drone.y += 1.0;
-                    } else if (strcmp(buffer, "LEFT") == 0) {
-                        drone.x -= 1.0;
-                    } else if (strcmp(buffer, "RIGHT") == 0) {
-                        drone.x += 1.0;
-                    } else if (strcmp(buffer, "STOP") == 0) {
-                        drone.vx = 0.0;
-                        drone.vy = 0.0;
-                    } else if (strcmp(buffer, "RESET") == 0) {
-                        drone.x = 10.0;
-                        drone.y = 10.0;
-                        drone.vx = 0.0;
-                        drone.vy = 0.0;
-                    }
-
-                    // Send updated state to input and output windows
-                    snprintf(buffer, sizeof(buffer), "%f %f %f %f", drone.x, drone.y, drone.vx, drone.vy);
-                    write(input_process_pipe[1], buffer, strlen(buffer) + 1);
-                    write(output_process_pipe[1], buffer, strlen(buffer) + 1);
-                }
-            }
-        }
+    // Spawn the input process in a new terminal window
+    char *input_process_arg_list[] = {"konsole", "-e", "./input_window_process", input_ask, input_receive, NULL};
+    if (fork() == 0) {
+        execvp(input_process_arg_list[0], input_process_arg_list);
+        error_exit("Failed to spawn input window process");
     }
+
+    // Spawn the output process in a new terminal window
+    char *output_process_arg_list[] = {"konsole", "-e", "./output_window_process", output_ask, output_receive, NULL};
+    if (fork() == 0) {
+        execvp(output_process_arg_list[0], output_process_arg_list);
+        error_exit("Failed to spawn output window process");
+    }
+
+    // Wait for all child processes to finish
+    for (int i = 0; i < 4; i++) {
+        wait(NULL);
+    }
+
+    // Close and remove named pipes
+
+    close(fd_input_ask);
+    close(fd_input_receive);
+    close(fd_output_ask);
+    close(fd_output_receive);
+
+
+    unlink(input_ask);
+    unlink(input_receive);
+    unlink(output_ask);
+    unlink(output_receive);
 
     return 0;
 }
