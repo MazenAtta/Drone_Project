@@ -14,7 +14,6 @@ typedef struct {
     int x, y;
     int id;
 } Target;
-
 // Initialize obstacles and targets
 void init_obstacles(Obstacle obstacles[]);
 void init_targets(Target targets[]);

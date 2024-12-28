@@ -23,9 +23,6 @@ void init_ncurses();
 // Draw the drone at a specific position
 void draw_drone(Drone *drone, char *status);
 
-// Handle key input and update drone position
-int handle_input(Drone *drone, char *status);
-
 // Close ncurses properly
 void close_ncurses();
 

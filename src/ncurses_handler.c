@@ -1,5 +1,4 @@
 #include "ncurses_handler.h"
-#include "ui_handler.h"
 #include "obstacle_target_handler.h"
 
 
@@ -22,24 +21,6 @@ void init_ncurses() {
 
 void draw_drone(Drone *drone, char *status) {
     mvaddch((float)drone->y, (float)drone->x, DRONE_SYMBOL| COLOR_PAIR(1));
-    display_status((float)drone->x,(float)drone->y, status);
-    display_legend();
-}
-
-int handle_input(Drone *drone, char *status) {
-    int ch = getch();
-    switch (ch) {
-        case KEY_UP:    drone->command_force_y = -COMMAND_FORCE_STEP; strcpy(status, "Moving Up"); break;
-        case KEY_DOWN:  drone->command_force_y = COMMAND_FORCE_STEP; strcpy(status, "Moving Down"); break;
-        case KEY_LEFT:  drone->command_force_x = -COMMAND_FORCE_STEP; strcpy(status, "Moving Left"); break;
-        case KEY_RIGHT: drone->command_force_x = COMMAND_FORCE_STEP; strcpy(status, "Moving Right"); break;
-        case 's':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Stopped"); break; return STOP;        
-        case 'a':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET_GAME; // Reset
-        case 'q':       return QUIT; // Quit
-        case 'r':       drone->prev_total_command_force_x = 0; drone->prev_total_command_force_y = 0; drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Resetting"); return RESET; // Reset
-        default:        drone->command_force_x = 0; drone->command_force_y = 0; strcpy(status, "Idle"); break;
-    }
-    return APPLY_MOVEMENT;
 }
 
 void close_ncurses() {

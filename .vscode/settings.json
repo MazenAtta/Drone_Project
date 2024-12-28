@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "thread": "c",
+        "physics_handler.h": "c",
+        "obstacle_target_handler.h": "c"
+    }
+}
